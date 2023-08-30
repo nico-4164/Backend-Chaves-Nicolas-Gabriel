@@ -1,23 +1,25 @@
-const fs = require('fs');
+import fs from 'fs';
 
-class ProductManager{
+export class ProductManager{
 
     constructor(path){
-        console.log("el path del archivo: "+path)
         this.path = path
         this.format = "utf-8"
+        this.mensaje = ""
     }
 
-    camposVacios = (tittle, description, price, thumbnail, code, stock) => {
-        return (
-          tittle.trim().length === 0 ||
-          description.trim().length === 0 ||
-          price.trim().length === 0 ||
-          thumbnail.trim().length === 0 ||
-          code.trim().length === 0 ||
-          stock.trim().length === 0
-        );
-      };
+    async camposVacios(tittle, description, price, category, code, stock){
+        return  ( (tittle===undefined || tittle.trim().length==0) || 
+                (description===undefined || description.trim().length==0) || 
+                (price===undefined) ||  
+                (code===undefined || code.trim().length==0) || 
+                (stock===undefined)) ||
+                (category===undefined || category.trim().length==0) 
+    }
+
+    getMensaje(){
+        return this.mensaje;
+    }
 
     async existeCode(code){
 
@@ -35,60 +37,64 @@ class ProductManager{
         }
     }
 
-    async addProduct(tittle, description, price, thumbnail, code, stock){
+    async addProduct(tittle, description, code, price, stock, category, thumbnail){
 
-        if (this.camposVacios(tittle, description, price, thumbnail, code, stock)) {
-            console.log("campos invalidos")
+        if (await this.camposVacios(tittle, description, price, category, code, stock)) {
+            this.mensaje="campos invalidos";
+            return;
         }
         if(await this.existeCode(code)){
-            console.log("El codigo "+code+" es invalido para el producto "+tittle)
+            console.log("El codigo "+code+" es invalido para el producto "+tittle);
+            this.mensaje="El codigo "+code+" es invalido para "+tittle;
         }
         else{
+            this.mensaje="success";
+            let status = true;
             const id = await this.getNextId();
             const producto = {
                 id,
                 tittle,
                 description,
-                price,
-                thumbnail,
                 code,
-                stock
+                price,
+                status,
+                stock,
+                category,
+                thumbnail
             }
 
             this.getProducts()
             .then(products => {
                 products.push(producto)
                 return products
-            }).then(productNew => fs.promises.writeFile(this.path, JSON.stringify(productNew)))
+            })
+            .then(productNew => fs.promises.writeFile(this.path, JSON.stringify(productNew)))
         }
     }
 
-    async updateProduct(id, tittle, description, price, thumbnail, code, stock){
+    async updateProduct(id, tittle, description,code, price, stock, status, category, thumbnail){
 
         let productos = await this.getProducts()
-        console.log("log antes del update");
-        console.log(productos);
-
-        if(this.existeCode(code)){
-            return console.log("El codigo ya existe");
-        }
 
         for (let i = 0; i < productos.length; i++) {
             const p = productos[i];
 
             if (p.id == id) {
+
+                console.log("entro en la edicion");
+                
                 p.tittle=tittle;
                 p.description=description;
-                p.price=price;
-                p.thumbnail=thumbnail;
                 p.code=code;
+                p.price=price;
+                p.status=status;
                 p.stock=stock;
+                p.category=category;
+                p.thumbnail=thumbnail;
                 i=productos.length;
             } 
             
         }
-        console.log("log despues del update");
-        console.log(productos);
         fs.promises.writeFile(this.path, JSON.stringify(productos))
         
     }
@@ -98,19 +104,23 @@ class ProductManager{
         let productos = await this.getProducts()
         const filterProductos = await productos.filter((p) => p.id !== id)
 
-        console.log("log antes del delete");
-        console.log(productos);
-
         fs.promises.writeFile(this.path, JSON.stringify(filterProductos))
-
-        console.log("log despues del delete");
-        console.log(filterProductos);
 
     }
 
     getProducts = async() => {
         return fs.promises.readFile(this.path ,this.format)
         .then(content => JSON.parse(content))
+        .catch(e => {
+            console.log('ERROR', e)
+            return []
+        })
+    }
+
+    getProductsWithLimit = async(limite) => {
+        return fs.promises.readFile(this.path ,this.format)
+        .then(content => JSON.parse(content))
+        .then(productos => productos.slice(0,limite))
         .catch(e => {
             console.log('ERROR', e)
             return []
@@ -128,9 +138,7 @@ class ProductManager{
                 return p;
             } 
         }
-        
-        console.log("Product not found");
-        
+        return {status: 'El producto que desea modificar no se encontro'}
     }
 
     async getNextId(){
@@ -148,4 +156,3 @@ class ProductManager{
         }
     }
 }
-module.exports = { ProductManager };

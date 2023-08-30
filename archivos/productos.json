@@ -1,47 +1,52 @@
 [
     {
         "id": 1,
-        "tittle": "Fuente ASUS 500W",
-        "description": "Fuente de alimentacion asus de 500W",
-        "price": "20.000",
-        "thumbnail": "http:imagen-6",
-        "code": "BEASVC001",
-        "stock": "17"
+        "tittle": "producto de prueba",
+        "description": "producto para ver como ingresa en la lista de productos",
+        "code": "f0275",
+        "price": 20000,
+        "status": true,
+        "stock": 0,
+        "category": "componentes de prueba"
+    },
+    {
+        "id": 2,
+        "tittle": "producto de prueba",
+        "description": "producto para ver como ingresa en la lista de productos",
+        "code": "f02705",
+        "price": 20000,
+        "status": true,
+        "stock": 0,
+        "category": "componentes de prueba"
     },
     {
         "id": 3,
-        "tittle": "RX 6700 12Gb",
-        "description": "Tarjeta de video AMD",
-        "price": "300.000",
-        "thumbnail": "http:imagen-3",
-        "code": "OPP123",
-        "stock": "7"
+        "tittle": "producto de prueba modificado",
+        "description": "producto para ver como ingresa en la lista de productos modificado",
+        "code": "f0275",
+        "price": 20000,
+        "status": 0,
+        "stock": false,
+        "category": "componentes de prueba modificado"
     },
     {
         "id": 4,
-        "tittle": "ASUS B550 HDV",
-        "description": "Tarjeta madre de asus",
-        "price": "22.000",
-        "thumbnail": "http:imagen-4",
-        "code": "SIBCO548",
-        "stock": "15"
+        "tittle": "producto de prueba",
+        "description": "producto para ver como ingresa en la lista de productos",
+        "code": "f0505",
+        "price": 20000,
+        "status": true,
+        "stock": 0,
+        "category": "componentes de prueba"
     },
     {
         "id": 5,
-        "tittle": "RTX 4080 16Gb",
-        "description": "Tarjeta de video Nvidia",
-        "price": "500.000",
-        "thumbnail": "http:imagen-2",
-        "code": "BEASVC777",
-        "stock": "5"
-    },
-    {
-        "id": 6,
-        "tittle": "Fuente ASUS 1000w",
-        "description": "Fuente de alimentacion asus de 1000W",
-        "price": "65.000",
-        "thumbnail": "http:imagen-5",
-        "code": "BEASVC005",
-        "stock": "11"
+        "tittle": "producto de prueba",
+        "description": "producto para ver como ingresa en la lista de productos",
+        "code": "f05305",
+        "price": 20000,
+        "status": true,
+        "stock": 0,
+        "category": "componentes de prueba"
     }
 ]

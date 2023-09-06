@@ -1,15 +1,15 @@
-import {ProductManager} from '../../js/ProductManager.js';
+import {ProductManager} from '../public/js/ProductManager.js';
 import { Router } from 'express'
 
 const router = Router()
-const productos= new ProductManager("./archivos/productos.json");
+const productos= new ProductManager("./src/public/archivos/productos.json");
 
 router.get('/', async (req, res) => {
 
     let productLimit = req.query.limit;
     
     if (!productLimit || (productLimit >= productos.length)) {
-        res.send(await productos.getProducts())     
+        res.send(await productos.getProducts())    
     } else {
         res.send(await productos.getProductsWithLimit(parseInt(productLimit,10)))
         }

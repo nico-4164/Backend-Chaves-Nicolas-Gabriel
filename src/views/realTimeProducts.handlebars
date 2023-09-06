@@ -1,0 +1,80 @@
+<body>
+<div id="realTimeProducts">
+    <h1 id="realTimeProducts">PRODUCTOS EN TIEMPO REAL</h1>
+
+    <h3 id="realTimeProducts">Agregar producto nuevo</h3>
+    <form id="addProductForm">
+        <label for="tittle">Ingrese nombre del producto:</label>
+        <input type="text" id="tittle"><br>
+        <br><label for="desciption">Ingrese descripción del producto:</label>
+        <input type="text" id="desciption"><br>
+        <br><label for="code">Ingrese código del producto:</label>
+        <input type="text" id="code"><br>
+        <br><label for="price">Ingrese precio del producto:</label>
+        <input type="text" id="price"><br>
+        <br><label for="stock">Ingrese stock del producto:</label>
+        <input type="text" id="stock"><br>
+        <br><label for="category">Ingrese categoría del producto:</label>
+        <input type="text" id="category"><br><br>
+        <button type="submit">Agregar producto</button>
+    </form><br><br>
+
+    <h3 id="realTimeProducts">Eliminar producto</h3>
+    <form id="deleteProductForm">
+        <label for="id">Ingrese el ID del producto que desea eliminar:</label><br>
+        <input type="text" id="id"><br><br>
+        <button type="submit">Eliminar producto</button>
+    </form>
+
+    <div id="contenedor-productos">
+        {{#each products}}
+        <div id="realTimeProducts">
+            <h3 id="realTimeProducts">{{this.tittle}}</h3>
+            <p id="realTimeProducts">{{this.description}}</p>
+            <p id="realTimeProducts">Id del producto: {{this.id}}</p>
+            <p id="realTimeProducts">Precio: {{this.price}}</p>
+            <p id="realTimeProducts">Stock: {{this.stock}}</p>
+            <p id="realTimeProducts">{{this.category}}</p>
+            <hr>
+        </div>
+        {{/each}}
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        document.getElementById('addProductForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const tittle = document.getElementById("tittle").value;
+            const desciption = document.getElementById("desciption").value;
+            const code = document.getElementById("code").value;
+            const price = document.getElementById("price").value;
+            const stock = document.getElementById("stock").value;
+            const category = document.getElementById("category").value;
+
+            const producto = {
+                tittle,
+                desciption,
+                code,
+                price,
+                stock,
+                category
+            };
+
+            socket.emit('pedido', producto);
+        });
+
+        document.getElementById('deleteProductForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const id = document.getElementById("id").value;
+
+            socket.emit('delete', id);
+        });
+
+        socket.on('update', console.log);
+    </script>
+</div>
+</body>

@@ -1,41 +1,95 @@
-import {Carrito} from '../public/js/carrito.js'
-import {ProductManager} from '../public/js/ProductManager.js';
-import { Router } from 'express'
+import { Router } from 'express';
+import { cartModel } from '../models/cart.model.js';
+import { productModel } from '../models/productos.model.js';
 
-const router = Router()
-const cart = new Carrito('./archivos/carrito.json');
-const productos= new ProductManager("./archivos/productos.json");
+const router = Router();
 
 router.get('/', async (req, res) => {
-    res.json(await cart.getCart())
-})
-
-router.get('/:pid', async (req, res) => {
-
-    const pid = req.params.pid;
-    if (!pid) {
-        res.send({error:"la solicitud no existe"})
-    } else {
-        res.send(await cart.getCartById(parseInt(pid,10)))
+    try {
+        const carts = await cartModel.find();
+        res.send({ result: 'success', payload: carts });
+    } catch (error) {
+        console.log("No se pudo conectar a mongoose: " + error);
     }
-})
+});
 
-router.post('/', (req, res) => {
+router.put("/:cid", async (req, res) => {
+    const { cid } = req.params;
+    const product = req.body;
+    const productToAdd = {
+        totalItems: Number,
+        totalPrice: Number,
+        products: []
+    };
 
-    let c = req.body;
-    cart.createCart()
-    res.send({status: 'success'})
-})
+    if (!product) {
+        return res.send({ status: "error", error: "valores incompletos" });
+    }
+
+    const cart = await cartModel.updateOne({ _id: cid }, productToAdd);
+    res.send({ status: "success", payload: cart });
+});
+
+router.post("/", async (req, res) => {
+    const product = req.body;
+    const productToAdd = {
+        totalItems: 1,
+        totalPrice: 1,
+        products: product
+    };
+
+    if (!product) {
+        return res.send({ status: "error", error: req.body });
+    }
+
+    const cart = await cartModel.create(productToAdd);
+    res.send({ status: "success", payload: cart });
+});
 
 router.post('/:cid/product/:pid', async (req, res) => {
-
     const cid = req.params.cid;
-    const pid = req.params.pid;
+    const { pid } = req.params;
 
-    cart.updateCart(cid,await productos.getProductById(parseInt(pid,10)))
-    res.send({status: 'success'})
-})
+    try {
+        const product = await productModel.findOne({ _id: pid });
 
+        if (!product) {
+            return res.send({ status: "error", error: "Producto no encontrado" });
+        }
 
+        const productToAdd = {
+            totalItems: 1,
+            totalPrice: 1,
+            products: [product]
+        };
 
-export default router
+        const cart = await cartModel.updateOne({ _id: cid }, productToAdd);
+        res.send({ status: "success", payload: cart });
+    } catch (error) {
+        console.log("No se pudo conectar a mongoose: " + error);
+    }
+});
+
+router.delete('/carts/:cid', async (req, res) => {
+    const { cid } = req.params;
+
+    try {
+        const cart = await cartModel.deleteOne({ _id: cid });
+        res.send({ status: "success", payload: cart });
+    } catch (error) {
+        console.log("No se pudo conectar a mongoose: " + error);
+    }
+});
+
+router.delete("/carts/:cid/products/:pid", async (req, res) => {
+    const { pid, cid } = req.params;
+
+    try {
+        const result = await productModel.deleteOne({ _id: pid, products: pid });
+        res.send({ status: "success", payload: result });
+    } catch (error) {
+        console.log("No se pudo conectar a mongoose: " + error);
+    }
+});
+
+export default router;

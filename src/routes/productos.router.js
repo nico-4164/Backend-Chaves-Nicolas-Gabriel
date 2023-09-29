@@ -1,69 +1,90 @@
-import {ProductManager} from '../public/js/ProductManager.js';
-import { Router } from 'express'
+import { Router } from 'express';
+import { productModel } from '../models/productos.model.js';
+import express from 'express'
 
-const router = Router()
-const productos= new ProductManager("./src/public/archivos/productos.json");
+const router = Router();
 
 router.get('/', async (req, res) => {
+    let { price, limit } = req.query;
 
-    let productLimit = req.query.limit;
-    
-    if (!productLimit || (productLimit >= productos.length)) {
-        res.send(await productos.getProducts())    
-    } else {
-        res.send(await productos.getProductsWithLimit(parseInt(productLimit,10)))
-        }
-})
+    limit = parseInt(limit) || 10;
+    price = parseInt(price) || 1;
 
-
-
-router.get('/:pid', async (req, res) => {
-
-    const pid = req.params.pid;
-
-    if (!pid) {
-        res.send({productos})
-    } else {
-
-        let produto = await productos.getProductById(parseInt(pid,10));
-        
-        if (!produto) return res.send({error:"el producto no existe"})
-
-        res.send(produto)
+    try {
+        const products = await productModel.aggregate([
+            { $limit: limit },
+            { $sort: { price: price } }
+        ]);
+        res.render('products',{products})
+        //res.send({ result: 'success', payload: products });
+    } catch (error) {
+        console.log("No se pudo conectar a mongoose: " + error);
     }
-})
+});
+
+router.get('/category/:query', async (req, res) => {
+    let query = req.params.query;
+    let { price, limit } = req.query;
+
+    limit = parseInt(limit) || 10;
+    price = parseInt(price) || 1;
+
+    try {
+        const products = await productModel.aggregate([
+            { $match: { category: query } },
+            { $limit: limit },
+            { $sort: { price: price } }
+        ]);
+
+        res.send({ result: 'success', payload: products });
+    } catch (error) {
+        console.log("No se pudo conectar a mongoose: " + error);
+    }
+});
+
+router.get('/:page', async (req, res) => {
+    let page = parseInt(req.params.page);
+
+    try {
+        const products = await productModel.paginate({}, { page, limit: 5, lean: true });
+
+        products.prevLink = products.hasPrevPage ? `http://localhost:8080/api/productos/page=${products.prevPage}` : "";
+        products.nextPage = products.hasNextPage ? `http://localhost:8080/api/productos/page=${products.nextPage}` : "";
+        products.isValid = !(page <= 0 || page > products.totalPages);
+
+        res.send({ result: 'success', payload: products });
+    } catch (error) {
+        console.log("No se pudo conectar a mongoose: " + error);
+    }
+});
+
+router.post("/", async (req, res) => {
+    const { tittle, description, code, price, status, stock, category } = req.body;
+
+    if (!tittle || !description || !code || !price || !status || !stock || !category) {
+        return res.send({ status: "error", error: req.body });
+    }
+
+    const result = await productModel.create({ tittle, description, code, status, stock, category });
+    res.send({ status: "success", payload: result });
+});
 
 router.put("/:pid", async (req, res) => {
+    const { pid } = req.params;
+    const productToReplace = req.body;
 
-    const pid = req.params.pid;
-    const productUpdate = req.body;
-    await productos.updateProduct(parseInt(pid,10), productUpdate.tittle, productUpdate.description, productUpdate.code, productUpdate.price, productUpdate.status, productUpdate.stock, productUpdate.category, productUpdate.thumbnail)
-
-    res.send(await productos.getProductById(parseInt(pid,10)))
-})
-
-router.post('/', async (req, res) => {
-    const producto = req.body
-
-    await productos.addProduct(producto.tittle, producto.description, producto.code, producto.price, producto.stock, producto.category, producto.thumbnail);
-
-    let mensaje=productos.getMensaje();
-
-    res.send({status: mensaje})
-})
-
-router.delete('/:pid', (req, res) => {
-
-    const pid = req.params.pid;
-
-    if (!pid) {
-        res.send({productos})
-    } else {
-        productos.deleteProduct(parseInt(pid,10))      
-        res.send({status: 'producto eliminado'})
+    if (!productToReplace.tittle || !productToReplace.description || !productToReplace.code || !productToReplace.price || !productToReplace.stock || !productToReplace.category) {
+        return res.send({ status: "error", error: "valores incompletos" });
     }
-})
 
+    const result = await productModel.updateOne({ _id: pid }, productToReplace);
+    res.send({ status: "success", payload: result });
+});
 
+router.delete("/:pid", async (req, res) => {
+    const { pid } = req.params;
+    const result = await productModel.deleteOne({ _id: pid });
+    res.send({ status: "success", payload: result });
+});
 
-export default router
+export default router;

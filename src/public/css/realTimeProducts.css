@@ -1,0 +1,75 @@
+#realTimeProducts {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  #realTimeProducts h1,
+  #realTimeProducts h3 {
+    color: #333;
+  }
+  
+  #realTimeProducts ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  #realTimeProducts li {
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 20px;
+  }
+  
+  #realTimeProducts h2 {
+    color: #333;
+    font-size: 24px;
+    margin: 0 0 10px;
+  }
+  
+  #realTimeProducts p {
+    color: #666;
+    margin: 0;
+  }
+  
+  #realTimeProducts p:first-child {
+    margin-top: 10px;
+  }
+  
+  #realTimeProducts p:last-child {
+    margin-bottom: 10px;
+  }
+  #realTimeProducts body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 20px;
+  }
+  #realTimeProducts p::before {
+    font-weight: bold;
+  }
+  
+  #realTimeProducts li:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  #addProductForm,
+  #deleteProductForm {
+    margin-bottom: 20px;
+  }
+  
+  #addProductForm label,
+  #deleteProductForm label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  #addProductForm input,
+  #deleteProductForm input,
+  #addProductForm button,
+  #deleteProductForm button {
+    margin-top: 5px;
+  }
+  

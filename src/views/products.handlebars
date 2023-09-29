@@ -1,0 +1,42 @@
+<body class="products">
+  <h1 class="products">Lista de productos</h1>
+  <ul class="products">
+    {{#each products}}
+      <li class="products">
+        <h2 class="products">{{tittle}}</h2>
+        <p class="products">{{this.description}}</p>
+        <p class="products">Código: {{this.code}}</p>
+        <p class="products">Precio: {{this.price}}</p>
+        <p class="products">Estado: {{this.status}}</p>
+        <p class="products">Stock: {{this.stock}}</p>
+        <p class="products">Categoría: {{this.category}}</p>
+        <button class="addToCart">Agregar al carrito</button>
+      </li>
+    {{/each}}
+  </ul>
+  <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        document.getElementById('addProductForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const tittle = document.getElementById("tittle").value;
+            const desciption = document.getElementById("desciption").value;
+            const code = document.getElementById("code").value;
+            const price = document.getElementById("price").value;
+            const stock = document.getElementById("stock").value;
+            const category = document.getElementById("category").value;
+
+            const producto = {
+                tittle,
+                desciption,
+                code,
+                price,
+                stock,
+                category
+            };
+
+            socket.emit('pedido', producto);
+        });
+    </script>
+</body>

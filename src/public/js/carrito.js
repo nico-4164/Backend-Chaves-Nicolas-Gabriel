@@ -59,15 +59,11 @@ export class Carrito{
 
         let cart = await this.getCart();
         let pid = producto.id;
-        console.log("log del id producto");
-        console.log(pid);
 
         for (let i = 0; i < cart.length; i++) {
             const c = cart[i];
 
             if (c.id == id) {
-                console.log("log del carrito");
-                console.log(c.products);
                 if (c.products.length == 0) {
                     c.products.push({
                         "product": pid,
@@ -76,8 +72,6 @@ export class Carrito{
                 } else {
                     for (let j = 0; j < c.products.length; j++) {
                         const p = c.products[j];
-                        console.log("log del producto dentro del carrito");
-                        console.log(p);
                         if (p.product === pid) {
                             p.quantity+=1;
                         }

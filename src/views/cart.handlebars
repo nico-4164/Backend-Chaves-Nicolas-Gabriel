@@ -1,0 +1,13 @@
+<div class="container-cart">
+  <h1>Carrito</h1>
+  <h4>Productos en el carrito:</h4>
+  <div class="container-products-carts">
+     {{#each products}}
+       <div class="product-container">
+          <p><span>Producto:</span> {{this.product.title}}</p>
+          <p><span>Cantidad:</span> {{this.quantity}}</p>
+       </div>
+      {{/each}}
+  </div>
+  <a class="volver" href="/products">volver</a>
+</div>

@@ -1,60 +1,65 @@
-import { ProductManager } from './public/js/ProductManager.js';
-import { Server } from "socket.io";
-import __dirname from './utils.js';
-import carritoRouter from './routes/carrito.router.js'
-import express from 'express'
+import carritoRouter from './routes/carrito.router.js';
+import express from 'express';
 import handlebars from 'express-handlebars';
-import productosRouter from './routes/productos.router.js'
-import viewsRouter from './routes/realTimeProducts.router.js'
 
+import realTimeProducts from './routes/realTimeProducts.router.js';
+import productosRouter from './routes/productos.router.js';
+import userRouter from './routes/user.router.js';
+
+import mongoose from 'mongoose';
+import { productModel } from '../src/models/productos.model.js';
+import { Server } from 'socket.io';
+
+// Init Servers
 const app = express()
-const productManager= new ProductManager("./src/public/archivos/productos.json");
+const httpServer = app.listen(8080, () => console.log("Servidor arriba en el puerto 8080..."))
+const io = new Server(httpServer)
 
-app.use(express.json())
-app.use('/static', express.static('public'))
 
-app.engine('handlebars', handlebars.engine())
-app.set('views',__dirname + '/views')
-app.set('view engine','handlebars')
-
-app.get('/', async (req, res) => {
-    const productos = await productManager.getProducts();
-    res.render('home',{productos})
+mongoose.connect('mongodb+srv://nicolaschaves1991:iYm9g3zcwk40HyyF@coderhousebackend.uunghaj.mongodb.net/?retryWrites=true&w=majority').then(() => {
+  // Conexión exitosa
+  console.log('Conexión a la base de datos establecida');
 })
+.catch((error) => {
+  // Error en la conexión
+  console.error('Error al conectar a la base de datos:', error);
+});
 
-app.use('/realtimeproducts', viewsRouter)
-app.use('/api/productos', productosRouter)
-app.use('/api/carts', carritoRouter)
+// Config engine templates
+app.engine('handlebars', handlebars.engine());
+app.set('views','./src/views');
+app.set('view engine', 'handlebars');
+app.use(express.static('./src/public'));
+app.use(express.json());
+app.use('/static', express.static('public'));
 
-const httpServer = app.listen(8080, () => console.log("Servidor arriba en el puerto 8080"));
-const socketServer = new Server(httpServer)
+app.use('/realtimeproducts', realTimeProducts)
+app.use('/api/productos', productosRouter);
+app.use('/api/carts', carritoRouter);
+app.use('/api/users',userRouter);
 
-socketServer.on('connection', async socket => {
+const messages = []
 
-    console.log('conexion exitosa');
+io.on('connection', socket => {
+    console.log('New client connected');
 
     socket.on('pedido', async data => {
 
         console.log("SERVER: ", {data});
+        const { tittle, description, code, price, status, stock, category } = data
 
-        await productManager.addProduct(data.tittle, data.desciption, data.code, data.price, data.stock, data.category, data.thumbnail)
-        const productos = await productManager.getProducts();
+        console.log("titulo: ",tittle);
 
-        console.log(productos)
-        socket.emit('update',productos)
+        await productModel.create({ tittle, description, code, status, stock, category });
+        const products = await productModel.find();
+
+        console.log(products)
+        socket.emit('update',products)
         
     })
-
-    socket.on('delete', async data => {
-
-        console.log("SERVER: ", data);
-
-        await productManager.deleteProduct(parseInt(data,10))
-        const productos = await productManager.getProducts();
-
-        console.log(productos)
-        socket.emit('update',productos)
-        
+    
+    socket.on('message', data => {
+        messages.push(data)
+        io.emit('logs', messages)
     })
-
 })
